@@ -1,0 +1,30 @@
+/* Remove heights from specified elements */
+.c-dhzjXW-idNOCmT-css,
+.c-PJLV-idZGrWe-css,
+.c-dhzjXW-iSwhOJ-css {
+    height: auto !important;
+}
+
+.c-bQzyIt {
+    grid-template-rows: auto !important;        /* Explicit row sizing */
+    grid-auto-rows: min-content !important;     /* Implicit row sizing */
+    align-items: start !important;              /* Vertical alignment */
+}
+
+.c-dqzIym-gKzrVx-lines-2 {
+    display: block !important;
+}
+
+.c-dhzjXW-ilnIma-css {
+    height: auto !important;
+    min-height: 56px !important;
+    max-height: 100px !important;
+}
+
+.c-dhzjXW-ibFYNkb-css {
+    height: auto !important;
+}
+
+.c-dqzIym-igyRnGv-css {
+    margin-bottom: 10px !important;
+}
