@@ -1,0 +1,48 @@
+/* Remove heights from specified elements */
+.c-dhzjXW-idNOCmT-css,
+.c-PJLV-idZGrWe-css,
+.c-dhzjXW-iSwhOJ-css {
+    height: auto !important;
+}
+
+.c-bQzyIt-iykkvT-css {
+    grid-template-rows: auto !important;        /* Explicit row sizing */
+    grid-auto-rows: min-content !important;     /* Implicit row sizing */
+    align-items: start !important;              /* Vertical alignment */
+}
+
+.c-dqzIym-gKzrVx-lines-2 {
+    display: block !important;
+}
+
+.c-dhzjXW-ilnIma-css {
+    height: auto !important;
+    min-height: 56px !important;
+    max-height: 100px !important;
+}
+
+.c-dhzjXW-ibFYNkb-css {
+    height: auto !important;
+}
+
+.c-dqzIym-igyRnGv-css {
+    margin-bottom: 10px !important;
+}
+
+.c-bQzyIt {
+    display: block !important;
+    column-width: 300px !important;        /* Minimum width for each column */
+    column-gap: 1rem !important;           /* Gap between columns */
+    padding: 1rem !important;              /* Optional: add some padding so margins are visible */
+}
+
+.c-dhzjXW-idNOCmT-css {
+    display: inline-block !important;      /* Treat items as blocks within columns */
+    width: 100% !important;                /* Make them take full column width */
+    vertical-align: top !important;        /* Align items to the top */
+    margin: 0 0 1rem 0 !important;         /* 1rem bottom margin for vertical spacing */
+    
+    /* Prevent the item from splitting between columns */
+    break-inside: avoid !important;
+    -webkit-column-break-inside: avoid !important; /* for Safari */
+}
