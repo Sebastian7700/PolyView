@@ -63,7 +63,7 @@ These extensions were built to simplify the Polymarket interface by ensuring tha
 
    This repository contains two folders:
    - `PolyView`
-   - `PolyViewPlus`
+   - `PolyView+`
 
    Each folder is a complete Chrome extension.
 
@@ -72,7 +72,7 @@ These extensions were built to simplify the Polymarket interface by ensuring tha
    1. Open Chrome and navigate to `chrome://extensions/`
    2. Enable **Developer mode** (toggle in the top-right corner).
    3. Click on **Load unpacked**.
-   4. Select the folder of the extension you wish to install (either `PolyView` or `PolyViewPlus`).
+   4. Select the folder of the extension you wish to install (either `PolyView` or `PolyView+`).
 
 ---
 
