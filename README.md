@@ -35,11 +35,17 @@ These extensions were built to simplify the Polymarket interface by ensuring tha
 ### PolyView
 - **Removes height restrictions:** All bets on Polymarket are fully visible without the need to scroll.
 - **Immediate overview:** Quickly see every available betting option on the page.
-- **Show full title:** View the full title of every event without the need to hover over it.
+- **Shows full title:** Displays the full title of every event without the need to hover over it.
+
+![Screenshot](Screenshots/PolyView.png)
+
 
 ### PolyView+
 - **All PolyView features:** Includes all functionality of PolyView.
 - **Masonry-style layout:** Events are displayed in a clean, waterfall/masonry-style layout, optimizing the use of screen space.
+
+![Screenshot](Screenshots/PolyView+.png)
+
 
 ---
 
