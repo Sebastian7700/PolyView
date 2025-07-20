@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "PolyView",
-    "version": "1.0",
+    "version": "1.1",
     "description": "Removes height restrictions on Polymarket elements, making all bets immediately visible.",
     "content_scripts": [
       {

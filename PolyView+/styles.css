@@ -1,10 +1,21 @@
-/* Remove heights from specified elements */
-.c-dhzjXW-idNOCmT-css,
+/*
+ * Updated styles for the new Polymarket layout (as of July 2025).
+ * Layout classes have been replaced with selectors targeting the new grid system.
+ * Internal component classes that remained unchanged have been kept.
+*/
+
+/*
+ * OLD: .c-dhzjXW-idNOCmT-css
+ * NEW: The card is now a direct child of the grid container.
+ * The other two classes for list-style cards are unchanged.
+*/
+.grid > div,
 .c-PJLV-idZGrWe-css,
 .c-dhzjXW-iSwhOJ-css {
     height: auto !important;
 }
 
+/* This class seems to have been removed. But let's keep it for now, just in case. */
 .c-bQzyIt-iykkvT-css {
     grid-template-rows: auto !important;        /* Explicit row sizing */
     grid-auto-rows: min-content !important;     /* Implicit row sizing */
@@ -29,14 +40,23 @@
     margin-bottom: 10px !important;
 }
 
-.c-bQzyIt {
+/*
+ * OLD: .c-bQzyIt
+ * NEW: The main market list is now a div with the class "grid".
+ * We target it more specifically to avoid affecting other grids.
+*/
+.grid.h-auto.gap-3[class*="grid-cols-"] {
     display: block !important;
     column-width: 300px !important;        /* Minimum width for each column */
     column-gap: 1rem !important;           /* Gap between columns */
     padding: 1rem !important;              /* Optional: add some padding so margins are visible */
 }
 
-.c-dhzjXW-idNOCmT-css {
+/*
+ * OLD: .c-dhzjXW-idNOCmT-css
+ * NEW: Market cards are now direct children of the grid container.
+*/
+.grid.h-auto.gap-3[class*="grid-cols-"] > div {
     display: inline-block !important;      /* Treat items as blocks within columns */
     width: 100% !important;                /* Make them take full column width */
     vertical-align: top !important;        /* Align items to the top */
