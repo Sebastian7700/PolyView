@@ -9,7 +9,7 @@
  * NEW: The card is now a direct child of the grid container.
  * The other two classes for list-style cards are unchanged.
 */
-.grid > div,
+.grid > div > div,
 .c-PJLV-idZGrWe-css,
 .c-dhzjXW-iSwhOJ-css {
     height: auto !important;

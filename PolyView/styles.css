@@ -1,5 +1,5 @@
 /* Remove heights from specified elements */
-.grid > div,
+.grid > div > div,
 .c-PJLV-idZGrWe-css,
 .c-dhzjXW-iSwhOJ-css {
     height: auto !important;
