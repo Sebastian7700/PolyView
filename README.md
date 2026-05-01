@@ -26,6 +26,8 @@ Two lightweight Chrome extensions that improve your Polymarket experience by rev
 
 These extensions were built to simplify the Polymarket interface by ensuring that all available betting options are visible without scrolling. Whether you prefer the simpler approach of PolyView or the enhanced layout of PolyView+, you can now see every bet immediately upon loading the page.
 
+Due to changes in Polymarket’s site structure, the extensions now include a runtime patching mechanism that intercepts bundled JavaScript (Turbopack/Webpack) and removes UI limitations directly before execution.
+
 *Note: I created these extensions solely for my own convenience while checking odds for events. **No ongoing support or feature updates will be provided.***
 
 ---
@@ -36,6 +38,9 @@ These extensions were built to simplify the Polymarket interface by ensuring tha
 - **Removes height restrictions:** All bets on Polymarket are fully visible without the need to scroll.
 - **Immediate overview:** Quickly see every available betting option on the page.
 - **Shows full title:** Displays the full title of every event without the need to hover over it.
+- **Runtime patching:** Intercepts and modifies Polymarket’s bundled JavaScript to:
+  - Remove `.slice(0, 2)` limits on visible outcomes (expanded to `.slice(0, 99)` by default).
+  - Remove fixed height constraints (`h-[70px]`, `h-[71px]`, `h-[42px]`) to prevent cropping.
 
 ![Screenshot](Screenshots/PolyView.png)
 
@@ -84,6 +89,10 @@ Once installed:
 - The extension will automatically adjust the layout:
   - **PolyView:** All bets will be fully visible.
   - **PolyView+:** All bets are fully visible, and events are arranged in a masonry-style layout.
+
+**Customization:**
+- The default outcome cap is increased to `99`.  
+  You can change this value in `content.js` (`.slice(0, 99)`) to any number you prefer if this is too high.
 
 If you experience any issues, remember that these extensions are provided **as-is** and no further support or updates will be provided.
 
