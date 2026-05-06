@@ -1,24 +1,25 @@
 {
   "manifest_version": 3,
   "name": "PolyView+",
-  "version": "3.0",
-  "description": "Removes height restrictions on Polymarket elements, making all bets immediately visible, and displays events in a clean, masonry-style (waterfall) layout.",
+  "version": "4.0",
+  "description": "Enhances Polymarket by displaying all markets, and uncropping titles, making all information visible at a glance in a highly stable, customizable masonry layout.",
+  "permissions": ["storage", "tabs"],
   "content_scripts": [
     {
-      "matches": [
-        "https://polymarket.com/*",
-        "https://*.polymarket.com/*"
-      ],
-      "css": [
-        "styles.css"
-      ],
-      "js": [
-        "content.js"
-      ],
+      "matches": ["https://polymarket.com/*", "https://*.polymarket.com/*"],
+      "js": ["scripts/main-world-interceptor.js"],
       "run_at": "document_start",
       "world": "MAIN"
+    },
+    {
+      "matches": ["https://polymarket.com/*", "https://*.polymarket.com/*"],
+      "js": ["scripts/isolated-content.js"],
+      "run_at": "document_start"
     }
   ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
