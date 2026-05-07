@@ -8,14 +8,14 @@
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Architecture & Patches](#architecture-and-patches)
+- [Architecture & Patches](#architecture--patches)
 - [Troubleshooting & Self-Debugging](#troubleshooting--self-debugging)
 - [Disclaimer](#disclaimer)
 - [License](#license)
 
 ## Overview
 
-If you frequently analyze odds on Polymarket, you likely know the frustration of the default user interface. Complex markets with multiple outcomes (like elections, sports tournaments, or financial milestones) are artificially capped at just two visible options. Lengthy event descriptions are cropped with ellipses. Seeing the complete picture requires endless clicking, expanding, and scrolling.
+If you frequently analyze odds on **Polymarket**, you likely know the frustration of the default user interface. Complex markets with multiple outcomes (like elections, sports tournaments, or financial milestones) are artificially capped at just two visible options. Lengthy event descriptions are cropped with ellipses. Seeing the complete picture requires endless clicking, expanding, and scrolling.
 
 **PolyView+ solves this entirely.** It removes these arbitrary limits so every market outcome is instantly exposed and every event title is fully visible. To handle the massive vertical lists created by this newly expanded data, PolyView+ intelligently reorganizes the layout into a beautiful, Pinterest-style waterfall grid. 
 
@@ -27,15 +27,16 @@ The result is a dense, highly readable, and frictionless dashboard for market an
 
 * **Expanded Markets:** Overrides the client-side market renderer that trims event options to two items, allowing the extension to display a larger, configured set of visible markets.
 * **Uncropped Titles:** Removes line-clamping logic, ensuring long event and market titles are fully readable.
+* **Market Price Sorting:** Replaces the default probability-based sorting with a smart algorithm that selects the best sorting strategy. This sorts numerical markets logically by price, resulting in a beautiful bell curve of probabilities. 
 * **Stable Masonry Layout:** Replaces standard lists with a dense, waterfall-style CSS Grid. Uses highly efficient `ResizeObserver` math to calculate 1px row-spans, preventing the visual jumping associated with virtualized scrollers.
 * **Native Performance:** Patches Virtuoso's viewport bounds so cards above the scroll position stay mounted, stabilizing the grid without sacrificing runtime smoothness.
 * **Customizable UI Popup:** A clean extension popup allows you to:
-  * Toggle the Masonry layout on or off.
+  * Toggle the Masonry layout or Custom Sorting on/off.
   * Customize the maximum number of visible markets.
   * Edit and launch a customized quick-link to your preferred Polymarket page.
   * Apply changes in real-time via `chrome.storage` synchronization.
 
-![PolyView+ interface showing expanded market rows and stable waterfall-style layout](Screenshots/PolyView+.avif)
+![PolyView+ interface showing expanded market rows and stable waterfall-style layout](demo/PolyView+.avif)
 
 ## Installation
 
@@ -63,11 +64,11 @@ PolyView+ is not currently listed on the Chrome Web Store and must be installed 
 
 ## Architecture & Patches
 
-Polymarket's default UI heavily truncates market data. The problem is not that the data is missing, as network traffic still delivers all markets. The issue is the client-side rendering code, which intentionally slices the option list before it reaches the UI. Furthermore, because Polymarket uses React Virtuoso for virtualization, uncapped cards create variable heights that break the scroller's layout calculations.
+Polymarket's default UI heavily truncates market data. The problem is not that the data is missing, as **network traffic still delivers all markets**. The issue is the client-side rendering code, which intentionally **slices** the option list before it reaches the UI. Furthermore, because Polymarket uses React Virtuoso for virtualization, uncapped cards create variable heights that break the scroller's layout calculations.
 
-PolyView+ solves this by patching the site in memory as it loads. It relies on a robust **In-Memory Hooking Architecture**. The extension injects a script into the `MAIN` execution world at `document_start`. It uses `Object.defineProperty` to trap the `globalThis.TURBOPACK` and `globalThis.webpackChunk_N_E` arrays. When the site loads a JavaScript chunk, the interceptor pauses execution, reads the function as a string, applies regex-based patches, re-evaluates the function, and passes it back to the framework.
+**PolyView+** solves this by patching the site in memory as it loads. It relies on a robust **In-Memory Hooking Architecture**. The extension injects a script into the `MAIN` execution world at `document_start`. It uses `Object.defineProperty` to trap the `globalThis.TURBOPACK` and `globalThis.webpackChunk_N_E` arrays. When the site loads a JavaScript chunk, the interceptor pauses execution, reads the function as a string, applies regex-based patches, re-evaluates the function, and passes it back to the framework.
 
-PolyView+ targets two specific JavaScript chunks identified by unique combinations of strings (signatures) found within them.
+PolyView+ targets specific JavaScript chunks identified by unique combinations of strings (signatures) found within them.
 
 ### Target 1: Market Card UI
 
@@ -128,15 +129,36 @@ This chunk handles the infinite-scroll viewport calculations. It is identified b
 * **Context:** Internally, `react-virtuoso` tracks what to render by calculating a visible pixel range array: `[topLimit, bottomLimit]`. In the minified code, the `topLimit` calculation looks something like `[Math.max(d-o-ej(i,"top",f)-h,0),`. This represents a logical formula such as `Math.max(containerHeight - distance - getOffset(element, "top", relativeTo) - buffer, 0)`. The patch simply replaces this complex calculation with `0`, transforming the virtual bounds into `[0, bottomLimit]`. This approach should remain stable as long as the underlying library logic doesn't drastically change.
 </details>
 
+<br>
+
+### Target 3: Data Sorting Logic
+
+Technically located in the same chunk as Target 1, but logically separated due to its unique signature. Identified by the function name `"sortMarketsByPriceDesc"`.
+
+<details>
+<summary><strong>Patch 3A: Market Price Sorting</strong></summary>
+
+* **Purpose:** By default, Polymarket sorts outcomes strictly by highest probability. For price-target markets, this jumbles the options (e.g., $20, $10, $30).
+* **Target:** The `sortMarketsByPriceDesc` array sort logic.
+* **Patch:** Rewrites the `.sort()` function to:
+  1. Check if markets contain no numbers (e.g., "Apple", "NVIDIA"). If so, it falls back to the original probability sort to keep relevant markets at the top.
+  2. Attempt to sort using Polymarket's internal, sequential `groupItemThreshold`.
+  3. Fall back to a natural alphanumeric sort (descending) for "Highest to Lowest" order.
+  4. If all options begin with an arrow (`↑`/`↓`), it slices the first character before the alphanumeric sort, since arrow Unicode would jumble the order.
+* **Context:** For price markets, this results in a logical, numerical ordering that visually forms a bell curve of probabilities. The minified sorting utility function currently has a structure like this: `e.s(["getMarketProbability",0,s,"sortMarketsByPriceDesc",0,e=>[...e].sort((e,t)=>s(t)-s(e))])`
+</details>
+
 ## Troubleshooting & Self-Debugging
 
 If Polymarket pushes an update that alters their class names or bundle structure, PolyView+ may temporarily stop functioning. You can diagnose and fix this yourself using Chrome DevTools:
 
 1. **Check the Console:** Open DevTools (F12) and look for `[PolyView+] Patched function at key: X`. If these messages are missing, the chunk signatures have changed.
-2. **Update Market UI Signatures:** Inspect Polymarket's DOM. Locate the Tailwind classes currently applied to card bodies (e.g., `h-[71px]`). Update the `isMarketCardChunk` constant inside `scripts/main-world-interceptor.js` to match the site's new layout classes.
-3. **Update Market UI Patches:** After successfully updating the signature of the chunk, if cards still aren't expanding, check if the specific truncation classes (like `line-clamp-3` or `h-[71px]`) have been changed. Update the string replacements in the script accordingly.
-4. **Update Virtuoso Signatures:** Check if React Virtuoso's viewport calculation variables have changed. The regex in `topLimitRegex` may need adjusting if the `Math.max` structure was refactored.
+2. **Update Market UI Signatures:** Inspect Polymarket's DOM. Locate the Tailwind classes currently applied to card bodies (e.g., `"relative h-[71px] w-full mt-0.5 pb-1"`) and find them in a `.js` file. Update the `isMarketCardChunk` constant inside `scripts/main-world-interceptor.js` to match the site's new layout classes. If the specific truncation classes (like `line-clamp-3` or `h-[71px]`) also have changed, update the string replacements in the script accordingly.
+3. **Update Virtuoso Signatures:** Check if React Virtuoso's viewport calculation variables have changed. The regex in `topLimitRegex` may need adjusting if the `Math.max` structure was refactored.
+4. **Update Sorting Signatures:** Open the Network tab in DevTools, search across all downloaded `.js` files for `"sortMarketsByPriceDesc"`, and verify if the arrow-function signature within the `sortRegex` needs updating.
 5. **Reload:** Save your local code changes, click the refresh icon on the extension card in `chrome://extensions/`, and reload the Polymarket tab.
+
+> **Note to Contributors:** If you successfully update a broken patch signature, it would be highly appreciated if you submit a Pull Request to help out other users!
 
 ## Disclaimer
 
