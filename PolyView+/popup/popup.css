@@ -13,12 +13,15 @@ body {
     border-bottom: 1px solid #2d3238;
     padding-bottom: 8px;
 }
-.settings label {
+.settings-row, .toggle-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 8px;
     margin-bottom: 12px;
     font-size: 14px;
+}
+.label-text {
+    flex: 1;
 }
 input[type="number"], input[type="text"] {
     background: #2d3238;
@@ -28,34 +31,32 @@ input[type="number"], input[type="text"] {
     padding: 6px;
     font-size: 14px;
 }
-input[type="number"] { width: 50px; text-align: right; }
+input[type="number"] {
+    width: 50px;
+    text-align: right;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"][type=number] {
+    -moz-appearance: textfield;
+}
 input[type="text"] { flex: 1; width: 100%; }
 
-/* Info Warning */
-.warning-box {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #20252b;
-    padding: 8px;
-    border-radius: 6px;
-    font-size: 11px;
-    color: #a0a6ae;
-    margin-bottom: 16px;
-    position: relative;
+/* Info Icons */
+.info-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: #5a6068;
     cursor: help;
+    transition: color 0.2s;
 }
-.icon-info { width: 14px; height: 14px; flex-shrink: 0; }
-.tooltip {
-    display: none;
-    position: absolute;
-    top: 100%; left: 0; right: 0;
-    background: #3b82f6; color: white;
-    padding: 8px; border-radius: 4px;
-    z-index: 10; margin-top: 4px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+.info-icon:hover {
+    color: #8a91a8;
 }
-.warning-box:hover .tooltip { display: block; }
 
 /* Toggle Switch */
 .toggle-switch { position: relative; width: 34px; height: 20px; }
@@ -72,6 +73,42 @@ input[type="text"] { flex: 1; width: 100%; }
 }
 input:checked + .slider { background-color: #3b82f6; }
 input:checked + .slider:before { transform: translateX(14px); }
+
+/* Disabled Toggle */
+/* Add pointer-events: none to fully prevent clicks when disabled */
+.toggle-switch.disabled { pointer-events: none; }
+
+.toggle-switch.disabled .slider {
+    background-color: #2d3238;
+    cursor: pointer;
+    opacity: 0.5;
+}
+.toggle-switch.disabled input:checked + .slider {
+    background-color: #1e4a8a;
+    opacity: 0.5;
+}
+.toggle-row.disabled { opacity: 0.6; }
+.toggle-row.disabled .label-text { color: #6a7078; }
+
+/* Info Tooltip */
+.info-tooltip {
+    background: #20252b;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #a0a6ae;
+    margin-top: 12px;
+    line-height: 1.4;
+    border-left: 3px solid #3b82f6;
+    opacity: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(0);
+}
+.info-tooltip.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-4px);
+}
 
 /* Buttons & Rows */
 .launcher-row {
@@ -104,3 +141,17 @@ input:checked + .slider:before { transform: translateX(14px); }
 }
 .outline-btn svg { width: 16px; height: 16px; margin-right: 6px; }
 .outline-btn:hover { background: rgba(251, 191, 36, 0.1); }
+
+/* Save Indicator Styles */
+.save-indicator {
+    color: #4ade80;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+    font-weight: 500;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+.save-indicator.hidden {
+    display: none !important;
+}

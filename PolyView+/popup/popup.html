@@ -9,24 +9,29 @@
     </div>
     
     <div class="settings">
-        <label>
-            <span>Max Visible Markets:</span>
+        <div class="settings-row">
+            <svg class="info-icon" data-info="maxItems" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span class="label-text">Max Visible Markets</span>
             <input type="number" id="maxItems" min="2" max="999" />
-        </label>
-        
-        <div class="warning-box">
-            <svg class="icon-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            <span>Note: Some API responses limit to 5 markets.</span>
-            <div class="tooltip">An Event is the overarching topic (e.g. World Cup). Markets are the bettable sub-options (e.g. France, Spain). Polymarket's backend sometimes caps the provided market data to 5.</div>
         </div>
 
-        <label class="toggle-row">
-            <span>Masonry Layout</span>
-            <div class="toggle-switch">
+        <div class="toggle-row">
+            <svg class="info-icon" data-info="masonry" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span class="label-text">Masonry Layout</span>
+            <label class="toggle-switch">
                 <input type="checkbox" id="masonryEnabled" />
                 <span class="slider"></span>
-            </div>
-        </label>
+            </label>
+        </div>
+
+        <div class="toggle-row">
+            <svg class="info-icon" data-info="sorting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span class="label-text">Market Price Sorting</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="customSorting" />
+                <span class="slider"></span>
+            </label>
+        </div>
     </div>
 
     <!-- Link Launcher & Editor -->
@@ -47,11 +52,21 @@
         </button>
     </div>
 
+    <!-- Save indicator -->
+    <div id="saveIndicator" class="save-indicator hidden">
+        Settings saved successfully!
+    </div>
+
     <!-- Hard Reload Button -->
     <button id="reloadBtn" class="outline-btn hidden">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
         Apply Changes & Reload
     </button>
+
+    <!-- Info Tooltip -->
+    <div class="info-tooltip hidden" id="infoTooltip">
+        <span id="tooltipText"></span>
+    </div>
 
     <script src="popup.js"></script>
 </body>
