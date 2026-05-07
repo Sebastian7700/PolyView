@@ -5,7 +5,7 @@
  */
 
 // 1. Initial sync on load
-chrome.storage.sync.get({ maxItems: 99, masonryEnabled: true }, (config) => {
+chrome.storage.sync.get({ maxItems: 99, masonryEnabled: true, customSorting: true }, (config) => {
     localStorage.setItem('polyview_config', JSON.stringify(config));
     applyFooterFix();
     if (config.masonryEnabled) {
@@ -19,7 +19,7 @@ chrome.storage.sync.get({ maxItems: 99, masonryEnabled: true }, (config) => {
 
 // 2. LIVE SYNC: Instantly updates localStorage when you click something in the popup.
 chrome.storage.onChanged.addListener(() => {
-    chrome.storage.sync.get({ maxItems: 99, masonryEnabled: true }, (config) => {
+    chrome.storage.sync.get({ maxItems: 99, masonryEnabled: true, customSorting: true }, (config) => {
         localStorage.setItem('polyview_config', JSON.stringify(config));
     });
 });

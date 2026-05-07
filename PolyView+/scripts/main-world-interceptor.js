@@ -1,6 +1,6 @@
 console.log("[PolyView+] Injecting Turbopack/Webpack interceptor...");
 
-let CONFIG = { maxItems: 99, masonryEnabled: true };
+let CONFIG = { maxItems: 99, masonryEnabled: true, customSorting: true };
 try {
     const stored = localStorage.getItem('polyview_config');
     if (stored) CONFIG = Object.assign(CONFIG, JSON.parse(stored));
@@ -99,6 +99,83 @@ function patchFunctionString(funcStr) {
             // Replaces the complex Math.max calculation with just `0`
             // The array becomes `[0, bottomLimitCalculation]`
             funcStr = funcStr.replace(topLimitRegex, "[0,");
+            modified = true;
+        }
+    }
+
+
+    // ============================================================
+    // PROFILE 3: Data Sorting
+    // Signature: Contains "sortMarketsByPriceDesc"
+    // Usually bundled within the UI chunk, but isolated here logically.
+    // ============================================================
+    if (CONFIG.customSorting && CONFIG.maxItems >= 10 && funcStr.includes("sortMarketsByPriceDesc")) {
+        // Patch 3A: Logical Price Sorting
+        // The regex looks for a call that looks like this: `"sortMarketsByPriceDesc", 0, data => [...data].sort((a, b) => fn(a) - fn(b))`
+        // Captures $1 (Function string), $2 (Array parameter), and $3 (Original sorting callback)
+        const sortRegex = /("sortMarketsByPriceDesc"\s*,\s*0\s*,\s*)([a-zA-Z0-9_$]+)\s*=>\s*\[\.\.\.\2\]\.sort\(\s*(\(\s*[a-zA-Z0-9_$]+\s*,\s*[a-zA-Z0-9_$]+\s*\)\s*=>\s*[a-zA-Z0-9_$]+\(\s*[a-zA-Z0-9_$]+\s*\)\s*-\s*[a-zA-Z0-9_$]+\(\s*[a-zA-Z0-9_$]+\s*\))\s*\)/;
+        
+        if (sortRegex.test(funcStr)) {
+            funcStr = funcStr.replace(sortRegex, `$1$2 => {
+                let markets = [...$2];
+                if (!CONFIG.customSorting) return markets.sort($3);
+
+                let useOriginalSort = false;
+                let useAlphanumeric = false;
+                let allHaveArrows = true;
+                let seenThresholds = new Set();
+                
+                for (let market of markets) {
+                    let title = String(market.groupItemTitle || market.question || "").trim();
+                    
+                    // Fallback 1: If any market lacks a number (e.g. "Apple", "NVIDIA")
+                    if (!/\\d/.test(title)) {
+                        useOriginalSort = true;
+                        break;
+                    }
+                    
+                    if (!title.startsWith("↑") && !title.startsWith("↓")) {
+                        allHaveArrows = false;
+                    }
+                    
+                    // Fallback 2: Check for missing or duplicate thresholds
+                    let threshold = market.groupItemThreshold;
+                    if (threshold !== undefined && threshold !== null && threshold !== "") {
+                        if (seenThresholds.has(threshold)) {
+                            useAlphanumeric = true;
+                            break;
+                        }
+                        seenThresholds.add(threshold);
+                    } else {
+                        useAlphanumeric = true;
+                    }
+                }
+                
+                // Execute Fallback 1: Original probability sorting
+                if (useOriginalSort) return markets.sort($3);
+                
+                // Execute Sorting
+                if (!useAlphanumeric) {
+                    markets.sort((a, b) => Number(a.groupItemThreshold) - Number(b.groupItemThreshold));
+                } else {
+                    markets.sort((a, b) => {
+                        let strA = String(a.groupItemTitle || a.question || "").trim();
+                        let strB = String(b.groupItemTitle || b.question || "").trim();
+
+                        if (allHaveArrows && strA.length > 0 && strB.length > 0) {
+                            // Slice the first character and compare the rest, since "↑" comes before "↓" in Unicode character map.
+                            // Prevents such an order (ascending): "↑ $120", "↑ $130", "↓ $55", "↓ $60", "↓ $65"
+                            strA = strA.slice(1).trim();
+                            strB = strB.slice(1).trim();
+                        }
+                        // Fallback: simple alphanumeric sort (descending) to keep "Highest to Lowest" order,
+                        // since non-numeric titles will use originalSort.
+                        return strB.localeCompare(strA, undefined, { numeric: true });
+                    });
+                }
+                
+                return markets;
+            }`);
             modified = true;
         }
     }
