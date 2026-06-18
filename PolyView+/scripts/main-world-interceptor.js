@@ -34,8 +34,8 @@ function patchFunctionString(funcStr) {
     // Signature: CSS and layout classes unique to the card builder
     // Targets the chunk responsible for rendering individual event cards.
     // ============================================================
-    const isMarketCardChunk = funcStr.includes("relative h-[71px] w-full mt-0.5 pb-1") || 
-                              funcStr.includes("relative h-[70px] w-full select-none");
+    const isMarketCardChunk = funcStr.includes("relative mt-0.5 h-20 w-full") || 
+                              funcStr.includes("relative h-20 w-full select-none");
     
     if (isMarketCardChunk) {
         // Patch 1A: Uncap market limits
@@ -47,10 +47,10 @@ function patchFunctionString(funcStr) {
         }
 
         // Patch 1B: Remove fixed heights to allow vertical expansion
-        // Targets: h-[70px] (mobile card body), h-[71px] (desktop card body), h-[42px] (card header)
-        // Effect: Allows the card bodies and headers to naturally expand vertically.
-        if (/h-\[(70|71|42)px\]/.test(funcStr)) {
-            funcStr = funcStr.replace(/h-\[(70|71|42)px\]/g, "h-auto");
+        // Targets: h-20 (fixed height for the desktop/mobile market row container)
+        // Effect: Allows the card rows to naturally expand vertically when more fields are rendered.
+        if (funcStr.includes("h-20")) {
+            funcStr = funcStr.replace(/h-20/g, "h-auto");
             modified = true;
         }
 
@@ -63,12 +63,11 @@ function patchFunctionString(funcStr) {
         }
 
         // Patch 1D: Uncrop Market Sub-titles
-        // Targets: The exact string "line-clamp-1 break-all group-hover:underline"
-        // Effect: Prevents individual market outcome names from truncating with ellipses, allowing them to wrap to multiple lines if needed.
-        // Since the chunk has another 'line-clamp-1' unrelated to the market rows, we target the entire class string for precision.
-        const subTitleTarget = "line-clamp-1 break-all group-hover:underline";
-        if (funcStr.includes(subTitleTarget)) {
-            funcStr = funcStr.replace(new RegExp(subTitleTarget, 'g'), "break-all group-hover:underline");
+        // Targets: line-clamp-1
+        // Effect: Removes the line restriction from individual market outcome names.
+        // Since this is the only occurrence of 'line-clamp-1' in the chunk, we can target it directly.
+        if (funcStr.includes("line-clamp-1")) {
+            funcStr = funcStr.replace(/line-clamp-1/g, "");
             modified = true;
         }
     }
@@ -103,14 +102,31 @@ function patchFunctionString(funcStr) {
         }
     }
 
+    // ============================================================
+    // PROFILE 3: Market Card Header
+    // Signature: Unique fixed height class for the card header container
+    // Targets the separate chunk responsible for rendering the top section of the card.
+    // ============================================================
+    const isMarketCardHeaderChunk = funcStr.includes("h-[42px]");
+    
+    if (isMarketCardHeaderChunk) {
+        // Patch 3A: Remove fixed header height to allow vertical expansion
+        // Targets: h-[42px] (card header wrapper)
+        // Effect: Allows the header containing the image and title to scale naturally.
+        if (funcStr.includes("h-[42px]")) {
+            funcStr = funcStr.replace(/h-\[42px\]/g, "h-auto");
+            modified = true;
+        }
+    }
+
 
     // ============================================================
-    // PROFILE 3: Data Sorting
+    // PROFILE 4: Data Sorting
     // Signature: Contains "sortMarketsByPriceDesc"
-    // Usually bundled within the UI chunk, but isolated here logically.
+    // Usually bundled within the Market Card Header chunk, but isolated here logically.
     // ============================================================
     if (CONFIG.customSorting && CONFIG.maxItems >= 10 && funcStr.includes("sortMarketsByPriceDesc")) {
-        // Patch 3A: Logical Price Sorting
+        // Patch 4A: Logical Price Sorting
         // The regex looks for a call that looks like this: `"sortMarketsByPriceDesc", 0, data => [...data].sort((a, b) => fn(a) - fn(b))`
         // Captures $1 (Function string), $2 (Array parameter), and $3 (Original sorting callback)
         const sortRegex = /("sortMarketsByPriceDesc"\s*,\s*0\s*,\s*)([a-zA-Z0-9_$]+)\s*=>\s*\[\.\.\.\2\]\.sort\(\s*(\(\s*[a-zA-Z0-9_$]+\s*,\s*[a-zA-Z0-9_$]+\s*\)\s*=>\s*[a-zA-Z0-9_$]+\(\s*[a-zA-Z0-9_$]+\s*\)\s*-\s*[a-zA-Z0-9_$]+\(\s*[a-zA-Z0-9_$]+\s*\))\s*\)/;

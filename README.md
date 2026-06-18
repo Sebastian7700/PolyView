@@ -72,7 +72,7 @@ PolyView+ targets specific JavaScript chunks identified by unique combinations o
 
 ### Target 1: Market Card UI
 
-This chunk is responsible for rendering individual event cards and their market options. It is identified by specific layout class signatures unique to the card builder, primarily `"relative h-[71px] w-full mt-0.5 pb-1"` and `"relative h-[70px] w-full select-none"`.
+This chunk is responsible for rendering individual event cards and their market options. It is identified by specific layout class signatures unique to the card builder, primarily `"relative mt-0.5 h-20 w-full"` and `"relative h-20 w-full select-none"`.
 
 <details>
 <summary><strong>Patch 1A: Uncap Market Limits</strong></summary>
@@ -87,12 +87,11 @@ This chunk is responsible for rendering individual event cards and their market 
 <summary><strong>Patch 1B: Remove Fixed Card Heights</strong></summary>
 
 * **Purpose:** Replaces rigid Tailwind height constraints, allowing cards to expand vertically to accommodate unhidden markets.
-* **Target:** CSS height classes `h-[70px]`, `h-[71px]`, and `h-[42px]`.
+* **Target:** The CSS height class `h-20`.
 * **Patch:** Replaces the specific pixel heights with `h-auto`.
 * **Context:** The targets can currently be found within these exact strings within the chunk:
-  * Mobile card body: `"relative h-[70px] w-full select-none"`
-  * Desktop card body: `"relative h-[71px] w-full mt-0.5 pb-1"`
-  * Card header: `"relative flex w-full items-start gap-2 px-3 h-[42px]"`
+  * Mobile card body: `"relative h-20 w-full select-none"`
+  * Desktop card body: `"relative mt-0.5 h-20 w-full"`
 </details>
 
 <details>
@@ -109,9 +108,9 @@ This chunk is responsible for rendering individual event cards and their market 
 <summary><strong>Patch 1D: Uncrop Market Names</strong></summary>
 
 * **Purpose:** Market outcome names are truncated to a single line and cut off with ellipses.
-* **Target:** The CSS classes `line-clamp-1 break-all group-hover:underline` on individual market outcome names.
-* **Patch:** Removes `line-clamp-1` but keeps `break-all group-hover:underline`. Names now wrap naturally to multiple lines.
-* **Context:** The chunk contains another, unrelated instance of `line-clamp-1`. To ensure we only uncrop market names without breaking other UI elements, we target the full class list string used in this chunk.
+* **Target:** The CSS class `line-clamp-1`.
+* **Patch:** Removes the line restriction from individual market outcome names.
+* **Context:** This is the only occurrence of `line-clamp-1` in the chunk, so it can be targeted directly without affecting unrelated UI elements.
 </details>
 
 <br>
@@ -131,12 +130,28 @@ This chunk handles the infinite-scroll viewport calculations. It is identified b
 
 <br>
 
-### Target 3: Data Sorting Logic
+### Target 3: Market Card Header
 
-Technically located in the same chunk as Target 1, but logically separated due to its unique signature. Identified by the function name `"sortMarketsByPriceDesc"`.
+This chunk likely contains UI helper functions. It is also responsible for rendering the top section of each event card and is identified by the fixed header height class `"h-[42px]"`.
 
 <details>
-<summary><strong>Patch 3A: Market Price Sorting</strong></summary>
+<summary><strong>Patch 3A: Remove fixed header height</strong></summary>
+
+* **Purpose:** The card header currently uses a fixed height, which can truncate the title and image area when markets expand.
+* **Target:** The CSS class `h-[42px]` on the header wrapper.
+* **Patch:** Replaces `h-[42px]` with `h-auto`, allowing the header section to scale naturally.
+* **Context:** The target can currently be found within this exact string within the chunk: 
+`"relative flex w-full items-start gap-2 px-3 h-[42px]"`
+</details>
+
+<br>
+
+### Target 4: Data Sorting Logic
+
+Technically located in the same chunk as Target 3, but logically separated due to its unique signature. Identified by the function name `"sortMarketsByPriceDesc"`.
+
+<details>
+<summary><strong>Patch 4A: Market Price Sorting</strong></summary>
 
 * **Purpose:** By default, Polymarket sorts outcomes strictly by highest probability. For price-target markets, this jumbles the options (e.g., $20, $10, $30).
 * **Target:** The `sortMarketsByPriceDesc` array sort logic.
@@ -153,7 +168,7 @@ Technically located in the same chunk as Target 1, but logically separated due t
 If Polymarket pushes an update that alters their class names or bundle structure, PolyView+ may temporarily stop functioning. You can diagnose and fix this yourself using Chrome DevTools:
 
 1. **Check the Console:** Open DevTools (F12) and look for `[PolyView+] Patched function at key: X`. If these messages are missing, the chunk signatures have changed.
-2. **Update Market UI Signatures:** Inspect Polymarket's DOM. Locate the Tailwind classes currently applied to card bodies (e.g., `"relative h-[71px] w-full mt-0.5 pb-1"`) and find them in a `.js` file. Update the `isMarketCardChunk` constant inside `scripts/main-world-interceptor.js` to match the site's new layout classes. If the specific truncation classes (like `line-clamp-3` or `h-[71px]`) also have changed, update the string replacements in the script accordingly.
+2. **Update Market UI Signatures:** Inspect Polymarket's DOM. Locate the Tailwind classes currently applied to card bodies (e.g. `"relative mt-0.5 h-20 w-full"` or `"relative h-20 w-full select-none"`) and the header section (`"h-[42px]"`) and find them in a `.js` file. Update the `isMarketCardChunk` and `isMarketCardHeaderChunk` constants inside `scripts/main-world-interceptor.js` to match the site's new layout classes. If the specific truncation classes (like `line-clamp-3`, `line-clamp-1`, or `h-20`) also have changed, update the string replacements in the script accordingly.
 3. **Update Virtuoso Signatures:** Check if React Virtuoso's viewport calculation variables have changed. The regex in `topLimitRegex` may need adjusting if the `Math.max` structure was refactored.
 4. **Update Sorting Signatures:** Open the Network tab in DevTools, search across all downloaded `.js` files for `"sortMarketsByPriceDesc"`, and verify if the arrow-function signature within the `sortRegex` needs updating.
 5. **Reload:** Save your local code changes, click the refresh icon on the extension card in `chrome://extensions/`, and reload the Polymarket tab.
